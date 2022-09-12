@@ -1,0 +1,88 @@
+---
+title: "Assignment-SQL and R"
+author: "Mahmud Hasan Al Raji"
+date: "`r Sys.Date()`"
+output: html_document
+---
+## R chunk Setup:
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Required Packages and libraries:
+```{r packages and library}
+install.packages("RMySQL")
+installed.packages("RODBC")
+install.packages("DBI")
+library(RMySQL)
+library(RODBC)
+library(DBI)
+library(dplyr)
+library(tidyverse)
+```
+## Connecting MysQL databasse with R:
+```{r}
+db=dbConnect(RMySQL::MySQL(),
+   dbname='mydatabase',
+   port= 3306,
+   host='localhost',
+   user='root',
+   password=rstudioapi::askForPassword("database password"))
+```
+##Table names:
+
+```{r}
+dbListTables(db)
+```
+## Running SQL query to get movie_view table:
+
+```{r}
+movie_view <- dbGetQuery(db,"SELECT * FROM `movie viewer status`;")
+movie_view
+```
+
+##Running SQL query to get 'movie_rating' table
+
+```{r }
+movie_rating <- dbGetQuery(db,"SELECT * FROM `movie rating`;")
+movie_rating
+```
+
+#Running SQL query to join table
+
+```{r join_table}
+join_table<-dbGetQuery(db,"SELECT* FROM 
+                      `movie viewer status` mv
+                      JOIN `movie rating` mr
+                       ON mv.`movie name`=mr.`movie name`;")
+join_table             
+```
+
+##Subsetting dataframe
+
+```{r}
+df1 <- subset(movie_rating, select=c("monir rate", "karim rate", "joseph rate", "prakash rate", "arony rate")) 
+df1
+```
+##Row values summation with handling missing values to get total point table:
+
+```{r}
+total_point<-rowSums(df1, na.rm=TRUE)
+total_point
+```
+
+#Addition of new column to movie_rating table:
+```{r}
+df2<-cbind(movie_rating,total_point)
+df2
+```
+## Subsetting to get final table showing movie wise total point:
+```{r}
+df_final <- subset(df2,select=c("movie name","total_point"))
+df_final
+```
+
+## Conclusion: From the data analysis above, it is found that"the territory" is the most popular movie in this survey.  
+
+
+
